@@ -1,0 +1,18 @@
+<project>
+	<name>Sumo BOSS Race</name>
+	<settings>
+		<defaultWidth>1024</defaultWidth>
+		<defaultHeight>768</defaultHeight>
+	</settings>
+	<tilesets>
+		<tileset name="walls" image="assets/wall.png" tileWidth="16" tileHeight="16"/>
+	</tilesets>
+	<objects>
+		<object name="player1" image="assets/player1.png" width="16" height="16" limit="1"/>
+		<object name="player2" image="assets/player2.png" width="16" height="16" limit="1"/>
+	</objects>
+	<layers>
+		<grid name="walls" gridSize="16"/>
+		<objects name="actors" gridSize="16"/>
+	</layers>
+</project>
