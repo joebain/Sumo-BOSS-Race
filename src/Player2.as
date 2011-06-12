@@ -12,12 +12,15 @@ package
 			graphic = new Image(PLAYER_2_IMAGE);
 			super(x,y);
 			
-			forwardKey = Key.N;
+			forwardKey = null;
 			leftKey = Key.J;
 			rightKey = Key.L;
-			boostKey = Key.I;
+			backKey = Key.K;
+			boostKey = Key.N;
 			bombKey = Key.M;
 			shieldKey = Key.B;
+			
+			playerNumber = 2;
 		}
 	}
 }

@@ -19,7 +19,7 @@ package
 		private var fastSpeed:Number = 1.3;
 		
 		private var rotSpeed:Number = 5;
-		private var slowRotSpeed:Number = 3;
+		private var slowRotSpeed:Number = 2;
 		
 		var image:Image;
 		private var halfSize = 8;
@@ -39,12 +39,16 @@ package
 		
 		private var xdown:Boolean = false;
 		
+		var playerNumber:int;
+		
 		var forwardKey:int;
 		var leftKey:int;
 		var rightKey:int;
+		var backKey:int;
 		var boostKey:int;
 		var bombKey:int;
 		var shieldKey:int;
+		private var going:Boolean = false;
 		
 		public function Car(x:Number, y:Number)
 		{
@@ -82,7 +86,7 @@ package
 		
 		function Right():void
 		{
-			if (kick) {
+			if (kick && !hasFlag) {
 				rotate(-slowRotSpeed);
 			}
 			else
@@ -93,7 +97,7 @@ package
 		
 		function Left():void
 		{
-			if (kick)
+			if (kick && !hasFlag)
 			{
 				rotate(slowRotSpeed);
 			}
@@ -142,6 +146,8 @@ package
 		
 		function ShieldOn():void
 		{
+			if (hasFlag) return;
+			
 			if (kick) {
 				KickOff();
 			}
@@ -165,7 +171,7 @@ package
 				kickGfx.x = x - 8;
 				kickGfx.y = y - 8;
 				kickGfx.Rotate(angle+180);
-				kickGfx.visible = true;
+				if (!hasFlag)kickGfx.visible = true;
 			}
 		}
 		
@@ -178,11 +184,13 @@ package
 		
 		function checkKeys():void
 		{
-			if (Input.check(forwardKey))
+			if (Input.check(backKey))
 			{
-				Forward();
-			} else {
 				Stop();
+				
+			} else {
+				Forward();
+				
 			}
 			if (Input.check(leftKey))
 			{
@@ -222,16 +230,28 @@ package
 		
 		override public function update():void
 		{
+			if (!going) return;
 			super.update();
 			
-			if (collide("wall", position.x, position.y) || 
-				(collide("car", position.x, position.y))) {
-				position.x = x;
-				position.y = y;
-				StopDead();
-			} else {
-				x = position.x;
+			var collideX:Entity = collide("wall", position.x, y);
+			var collideY:Entity = collide("wall", x, position.y);
+			var collideCarX:Entity = collide("car", position.x, y);
+			var collideCarY:Entity = collide("car", x, position.y);
+			if (!collideY && !collideCarY)
+			{
 				y = position.y;
+			}
+			else
+			{
+				position.y = y;
+				velocity.y = 0;
+			}
+			if (!collideX && !collideCarX) {
+				x = position.x;
+			}
+			else {
+				position.x = x;
+				velocity.x = 0;
 			}
 			
 			if (shield) {
@@ -242,6 +262,15 @@ package
 				kickGfx.x = x - 8;
 				kickGfx.y = y - 8;
 				kickGfx.Rotate(angle+180);
+			}
+			
+			var collideCar:Car = collide("car", x + forward.x * 8, y + forward.y + 8) as Car;
+			if (collideCar) {
+				if (collideCar.doesHaveFlag()) {
+					myFlag = collideCar.removeFlag();
+					hasFlag = true;
+					myFlag.setOwner(this);
+				}
 			}
 			
 			var bomb:Entity = collide("bomb", x + forward.x*8, y + forward.y*8);
@@ -295,11 +324,18 @@ package
 			return hasFlag;
 		}
 		
-		public function removeFlag():void
+		public function removeFlag():Flag
 		{
 			myFlag.setOwner(null);
 			hasFlag = false;
+			var aFlag:Flag = myFlag;
 			myFlag = null;
+			return aFlag;
+		}
+		
+		public function go():void
+		{
+			going = true;
 		}
 	}
 }

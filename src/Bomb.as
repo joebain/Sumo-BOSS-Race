@@ -19,7 +19,7 @@ package
 		private var startTime:int;
 		private var durationToStart:int = 1000;
 		private var durationToExplode:int = 1200;
-		private var explosionSize:Number = 100;
+		private var explosionSize:Number = 128;
 		private var exploding:Boolean = false;
 		private var startThrowTime:int;
 		var throwing:Boolean = false;
@@ -93,7 +93,8 @@ package
 			image.originX = 8;
 			image.originY = 8;
 			image.centerOO();
-			explosionSize = image.width;
+			
+			image.scale = explosionSize / image.width;
 			graphic = image;
 			exploding = true;
 			

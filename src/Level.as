@@ -1,12 +1,14 @@
 package
 {
-	import com.cheezeworld.entity.Entity;
+	import net.flashpunk.Entity;
 	
 	import flash.utils.ByteArray;
+	import flash.utils.getTimer;
 	
 	import net.flashpunk.Graphic;
 	import net.flashpunk.World;
 	import net.flashpunk.graphics.Image;
+	import net.flashpunk.graphics.Text;
 	
 	public class Level extends World
 	{
@@ -18,12 +20,18 @@ package
 		[Embed(source="../assets/vignette.png")]
 		private static const VG:Class;
 		
+		private var player2:Car;
+		private var player1:Car;
+		private var text:GoText;
+		
+		
 		public function Level(map:Class)
 		{
 			loadLevel(map);
-			
 			addGraphic(new Image(BG), 100);
 			addGraphic(new Image(VG), 0);
+			
+			
 		}
 		
 		private function loadLevel(xml:Class):void
@@ -57,12 +65,16 @@ package
 			
 			// load the players
 			var xmlPlayer:XML = xmlData.actors.player1[0];
-			var player1:Car = new Player1(xmlPlayer.attribute("x"), xmlPlayer.attribute("y"));
+			player1 = new Player1(xmlPlayer.attribute("x"), xmlPlayer.attribute("y"));
 			add(player1);
 			
 			xmlPlayer = xmlData.actors.player2[0];
-			var player2:Car = new Player2(xmlPlayer.attribute("x"), xmlPlayer.attribute("y"));
+			player2 = new Player2(xmlPlayer.attribute("x"), xmlPlayer.attribute("y"));
 			add(player2);
+			
+			// go text
+			text = new GoText(player1, player2);
+			add(text);
 			
 			//end zones
 			wallString = xmlData.endzone1[0].text();
