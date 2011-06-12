@@ -266,7 +266,7 @@ package
 			
 			var collideCar:Car = collide("car", x + forward.x * 8, y + forward.y + 8) as Car;
 			if (collideCar) {
-				if (collideCar.doesHaveFlag()) {
+				if (collideCar.doesHaveFlag() && collideCar.shieldOn()) {
 					myFlag = collideCar.removeFlag();
 					hasFlag = true;
 					myFlag.setOwner(this);
@@ -336,6 +336,24 @@ package
 		public function go():void
 		{
 			going = true;
+		}
+		
+		public function shieldOn():Boolean
+		{
+			return shield;
+		}
+		
+		public function nogo(vec:Vector2D):void
+		{
+			x = vec.x;
+			y = vec.y;
+			position = vec.copy();
+			going = false;
+			StopDead();
+			angle = 0;
+			forward.x = 0;
+			forward.y = 1;
+			image.angle = 0;
 		}
 	}
 }

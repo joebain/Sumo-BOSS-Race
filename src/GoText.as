@@ -52,8 +52,29 @@ package
 				else if (startTimer > 1000) {
 					gotext.text = "Set";
 					gotext.centerOO();
+				} else {
+					gotext.text = "Ready";
+					gotext.centerOO();
 				}
 			}
+		}
+		
+		public function say(s:String):void
+		{
+			Text.size = 300;
+			gotext = new Text(s);
+			graphic = gotext;
+			visible = true;
+			gotext.centerOO();
+			
+		}
+		
+		public function reset():void
+		{
+			starting = true;
+			startTime = flash.utils.getTimer();
+			visible = true;
+			
 		}
 	}
 }

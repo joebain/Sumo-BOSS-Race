@@ -9,6 +9,7 @@ package
 	import net.flashpunk.World;
 	import net.flashpunk.graphics.Image;
 	import net.flashpunk.graphics.Text;
+	import com.cheezeworld.math.Vector2D;
 	
 	public class Level extends World
 	{
@@ -23,6 +24,8 @@ package
 		private var player2:Car;
 		private var player1:Car;
 		private var text:GoText;
+		private var player1startpos:Vector2D;
+		private var player2startpos:Vector2D;
 		
 		
 		public function Level(map:Class)
@@ -66,10 +69,12 @@ package
 			// load the players
 			var xmlPlayer:XML = xmlData.actors.player1[0];
 			player1 = new Player1(xmlPlayer.attribute("x"), xmlPlayer.attribute("y"));
+			player1startpos = player1.position.copy();
 			add(player1);
 			
 			xmlPlayer = xmlData.actors.player2[0];
 			player2 = new Player2(xmlPlayer.attribute("x"), xmlPlayer.attribute("y"));
+			player2startpos = player2.position.copy();
 			add(player2);
 			
 			// go text
@@ -125,7 +130,23 @@ package
 			add(flag);
 			
 			//judge
-			add(new Judge(player1, player2));
+			add(new Judge(player1, player2, this, text));
+		}
+		
+		public function reset():void
+		{
+			player1.nogo(player1startpos);
+			
+			player2.nogo(player2startpos);
+			
+			text.reset();
+		}
+		
+		public function stop():void
+		{
+			player1.nogo(player1startpos);
+			
+			player2.nogo(player2startpos);
 		}
 	}
 }
