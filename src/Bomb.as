@@ -51,13 +51,10 @@ package
 			explosionSize = image.width;
 			graphic = image;
 			exploding = true;
-		}
-		
-		private function explode():void
-		{
+			
 			var colliders:Array = new Array;
-			var xbox:Number = x - explosionSize*0.5;
-			var ybox:Number = y - explosionSize*0.5;
+			var xbox:Number = x - explosionSize * 0.5 + 8;
+			var ybox:Number = y - explosionSize * 0.5 + 8;
 			world.collideRectInto("bomb", xbox, ybox, explosionSize, explosionSize, colliders);
 			for each (var bomb:Bomb in colliders) {
 				bomb.startToExplode();
@@ -67,6 +64,11 @@ package
 			for each (var car:Car in colliders) {
 				car.blast(x,y);
 			}
+		}
+		
+		private function explode():void
+		{
+			
 			
 			world.remove(this);
 		}

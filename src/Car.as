@@ -9,18 +9,31 @@ package
 	
 	public class Car extends Entity
 	{
-		private var speed:Number = 0.1;
+		[Embed(source="../assets/shield.png")] private static const SHIELD:Class;
+		[Embed(source="../assets/kick.png")] private static const KICK:Class;
+		
+		private var speed:Number = 1;
+		private var slowSpeed:Number = 0.6;
+		private var fastSpeed:Number = 1.3;
 		private var acceleration:Number = 0;
 		private var maxAccel:Number = 5;
 		private var rotSpeed:Number = 5;
+		private var slowRotSpeed:Number = 3;
 		
 		var image:Image;
 		private var halfSize = 8;
 		
 		private var forward:Vector2D = new Vector2D(0,1);
-		private var velocity:Vector2D = new Vector2D(0,1);
+		private var velocity:Vector2D = new Vector2D(0,0);
 		private var angle:Number = 0;
 		private var position:Vector2D = new Vector2D();
+		private var blastAccel:Number = 10;
+		
+		private var shieldGfx:Shield;
+		private var shield:Boolean = false;
+		
+		private var kickGfx:Shield;
+		private var kick:Boolean = false;
 		
 		public function Car(x:Number, y:Number)
 		{
@@ -37,21 +50,26 @@ package
 			height = 16;
 			type = "car";
 			layer = 1;
+			
 		}
 		
 		function Forward():void
 		{
-			acceleration += speed;
-			
-			//x = position.x;
-			//y = position.y;
+			if (shield) {
+				acceleration = slowSpeed;
+			}
+			else if (kick) {
+				acceleration = fastSpeed;
+			}
+			else
+			{
+				acceleration = speed;
+			}
 		}
 		
 		function Stop():void
 		{
 			acceleration = 0;
-			//velocity.x = 0;
-			//velocity.y = 0;
 		}
 		
 		function StopDead():void
@@ -63,12 +81,25 @@ package
 		
 		function Right():void
 		{
-			rotate(-rotSpeed);
+			if (kick) {
+				rotate(-slowRotSpeed);
+			}
+			else
+			{
+				rotate(-rotSpeed);
+			}
 		}
 		
 		function Left():void
 		{
-			rotate(rotSpeed);
+			if (kick)
+			{
+				rotate(slowRotSpeed);
+			}
+			else
+			{
+				rotate(rotSpeed);
+			}
 		}
 		
 		function DropBomb():void
@@ -76,21 +107,87 @@ package
 			world.add(new Bomb(x,y));
 		}
 		
+		private function makeShieldGfx():void
+		{
+			if (!shieldGfx) {
+				shieldGfx = new Shield(x,y, SHIELD);
+				world.add(shieldGfx);
+			}
+		}
+		
+		private function makeKickGfx():void
+		{
+			if (!kickGfx) {
+				kickGfx = new Shield(x,y, KICK);
+				kickGfx.Rotate(angle);
+				world.add(kickGfx);
+			}
+		}
+		
+		function ShieldOn():void
+		{
+			if (kick) {
+				KickOff();
+			}
+			makeShieldGfx();
+			shield = true;
+			shieldGfx.visible = true;
+		}
+		
+		function ShieldOff():void
+		{
+			makeShieldGfx();
+			shield = false;
+			shieldGfx.visible = false;
+		}
+		
+		function KickOn():void
+		{
+			if (!shield) {
+				makeKickGfx();
+				kick = true;
+				kickGfx.x = x - 8;
+				kickGfx.y = y - 8;
+				kickGfx.Rotate(angle+180);
+				kickGfx.visible = true;
+			}
+		}
+		
+		function KickOff():void
+		{
+			makeKickGfx();
+			kick = false;
+			kickGfx.visible = false;
+		}
+		
 		override public function update():void
 		{
 			if (acceleration > maxAccel) acceleration = maxAccel;
-			velocity = forward.multipliedBy(acceleration);
+			velocity.addTo(forward.multipliedBy(acceleration));
 			position.addTo(velocity);
 			
 			if (collide("wall", position.x, position.y) || 
 				(collide("car", position.x, position.y))) {
 				position.x = x;
 				position.y = y;
-				Stop();
+				StopDead();
 			} else {
 				x = position.x;
 				y = position.y;
 			}
+			
+			if (shield) {
+				shieldGfx.x = x - 8;
+				shieldGfx.y = y - 8;
+			}
+			if (kick) {
+				kickGfx.x = x - 8;
+				kickGfx.y = y - 8;
+				kickGfx.Rotate(angle+180);
+			}
+			
+			acceleration = 0;
+			velocity.multiply(0.7);
 		}
 		
 		private function rotate(amount:Number)
@@ -105,12 +202,13 @@ package
 		
 		public function blast(x:Number, y:Number):void
 		{
-			var vec:Vector2D = new Vector2D(x - this.x, y - this.y);
-			var len:Number = vec.length;
-			vec.normalize();
-			forward.addTo(vec.multipliedBy(1/len));
-			acceleration = forward.length;
-			forward.normalize();
+			if (!shield) {
+				var vec:Vector2D = new Vector2D(this.x - x, this.y - y);
+				var len:Number = vec.length;
+				vec.normalize();
+				vec.multiply(blastAccel);
+				velocity.addTo(vec);
+			}
 		}
 	}
 }

@@ -33,6 +33,22 @@ package
 			{
 				Right();
 			}
+			if (Input.check(Key.UP))
+			{
+				KickOn();
+			}
+			else
+			{
+				KickOff();
+			}
+			if (Input.check(Key.C))
+			{
+				ShieldOn();
+			}
+			else
+			{
+				ShieldOff();
+			}
 			if (Input.check(Key.X))
 			{
 				if (!xdown) {
