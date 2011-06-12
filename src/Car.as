@@ -42,14 +42,19 @@ package
 		function Forward():void
 		{
 			acceleration += speed;
-			if (acceleration > maxAccel) acceleration = maxAccel;
-			velocity = forward.multipliedBy(acceleration);
-			position.addTo(velocity);
+			
 			//x = position.x;
 			//y = position.y;
 		}
 		
 		function Stop():void
+		{
+			acceleration = 0;
+			//velocity.x = 0;
+			//velocity.y = 0;
+		}
+		
+		function StopDead():void
 		{
 			acceleration = 0;
 			velocity.x = 0;
@@ -72,7 +77,11 @@ package
 		}
 		
 		override public function update():void
-		{	
+		{
+			if (acceleration > maxAccel) acceleration = maxAccel;
+			velocity = forward.multipliedBy(acceleration);
+			position.addTo(velocity);
+			
 			if (collide("wall", position.x, position.y) || 
 				(collide("car", position.x, position.y))) {
 				position.x = x;
@@ -99,7 +108,9 @@ package
 			var vec:Vector2D = new Vector2D(x - this.x, y - this.y);
 			var len:Number = vec.length;
 			vec.normalize();
-			acceleration += vec.multipliedBy(1/length);
+			forward.addTo(vec.multipliedBy(1/len));
+			acceleration = forward.length;
+			forward.normalize();
 		}
 	}
 }
