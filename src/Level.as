@@ -38,7 +38,7 @@ package
 			
 			var y:int = 0;
 			var x:int = 0;
-			for (var i:int; i < wallString.length; ++i)
+			for (var i:int = 0; i < wallString.length; ++i)
 			{
 				var s:String = wallString.charAt(i);
 				switch (s)
@@ -63,6 +63,57 @@ package
 			xmlPlayer = xmlData.actors.player2[0];
 			var player2:Car = new Player2(xmlPlayer.attribute("x"), xmlPlayer.attribute("y"));
 			add(player2);
+			
+			//end zones
+			wallString = xmlData.endzone1[0].text();
+			
+			y = 0;
+			x = 0;
+			for (var i:int = 0; i < wallString.length; ++i)
+			{
+				var s:String = wallString.charAt(i);
+				switch (s)
+				{
+					case '1':
+						add(new Endzone(x*tileSpacing*2,y*tileSpacing*2,1));
+						break;
+					
+					case'\n':
+						x = -1;
+						++y;
+						break;
+				}
+				++x;
+			}
+			
+			wallString = xmlData.endzone2[0].text();
+			
+			y = 0;
+			x = 0;
+			for (var i:int = 0; i < wallString.length; ++i)
+			{
+				var s:String = wallString.charAt(i);
+				switch (s)
+				{
+					case '1':
+						add(new Endzone(x*tileSpacing*2,y*tileSpacing*2,2));
+						break;
+					
+					case'\n':
+						x = -1;
+						++y;
+						break;
+				}
+				++x;
+			}
+			
+			//the flag
+			xmlPlayer = xmlData.actors.flag[0];
+			var flag:Flag = new Flag(xmlPlayer.attribute("x"), xmlPlayer.attribute("y"));
+			add(flag);
+			
+			//judge
+			add(new Judge(player1, player2));
 		}
 	}
 }

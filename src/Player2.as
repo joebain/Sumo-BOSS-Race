@@ -1,6 +1,7 @@
 package
 {
 	import net.flashpunk.graphics.Image;
+	import net.flashpunk.utils.Key;
 
 	public class Player2 extends Car
 	{
@@ -10,6 +11,13 @@ package
 		{
 			graphic = new Image(PLAYER_2_IMAGE);
 			super(x,y);
+			
+			forwardKey = Key.N;
+			leftKey = Key.J;
+			rightKey = Key.L;
+			boostKey = Key.I;
+			bombKey = Key.M;
+			shieldKey = Key.B;
 		}
 	}
 }

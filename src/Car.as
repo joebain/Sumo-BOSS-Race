@@ -6,8 +6,10 @@ package
 	import net.flashpunk.Graphic;
 	import net.flashpunk.Mask;
 	import net.flashpunk.graphics.Image;
+	import net.flashpunk.utils.Input;
+	import net.flashpunk.utils.Key;
 	
-	public class Car extends Entity
+	public class Car extends MomentumThing
 	{
 		[Embed(source="../assets/shield.png")] private static const SHIELD:Class;
 		[Embed(source="../assets/kick.png")] private static const KICK:Class;
@@ -15,18 +17,13 @@ package
 		private var speed:Number = 1;
 		private var slowSpeed:Number = 0.6;
 		private var fastSpeed:Number = 1.3;
-		private var acceleration:Number = 0;
-		private var maxAccel:Number = 5;
+		
 		private var rotSpeed:Number = 5;
 		private var slowRotSpeed:Number = 3;
 		
 		var image:Image;
 		private var halfSize = 8;
 		
-		private var forward:Vector2D = new Vector2D(0,1);
-		private var velocity:Vector2D = new Vector2D(0,0);
-		private var angle:Number = 0;
-		private var position:Vector2D = new Vector2D();
 		private var blastAccel:Number = 10;
 		
 		private var shieldGfx:Shield;
@@ -34,6 +31,20 @@ package
 		
 		private var kickGfx:Shield;
 		private var kick:Boolean = false;
+		
+		private var bombButtFactor:Number = 3.5;
+		private var bombThrowFactor:Number = 20;
+		private var hasFlag:Boolean;
+		private var myFlag:Flag;
+		
+		private var xdown:Boolean = false;
+		
+		var forwardKey:int;
+		var leftKey:int;
+		var rightKey:int;
+		var boostKey:int;
+		var bombKey:int;
+		var shieldKey:int;
 		
 		public function Car(x:Number, y:Number)
 		{
@@ -55,7 +66,7 @@ package
 		
 		function Forward():void
 		{
-			if (shield) {
+			if (shield || hasFlag) {
 				acceleration = slowSpeed;
 			}
 			else if (kick) {
@@ -67,17 +78,7 @@ package
 			}
 		}
 		
-		function Stop():void
-		{
-			acceleration = 0;
-		}
 		
-		function StopDead():void
-		{
-			acceleration = 0;
-			velocity.x = 0;
-			velocity.y = 0;
-		}
 		
 		function Right():void
 		{
@@ -104,7 +105,22 @@ package
 		
 		function DropBomb():void
 		{
-			world.add(new Bomb(x,y));
+			var bombx:Number = x;
+			var bomby:Number = y;
+			var bomb:Bomb;
+			if (kick) {
+				var tox:Number = x + velocity.x * bombThrowFactor;
+				var toy:Number = y + velocity.y * bombThrowFactor;  
+				bombx += forward.x * 16;
+				bomby += forward.y * 16;
+				bomb = new Bomb(bombx, bomby);
+				bomb.throwTo(forward);
+			} else {
+				bombx -= forward.x * 16;
+				bomby -= forward.y * 16;
+				bomb = new Bomb(bombx, bomby);
+			}
+			world.add(bomb);
 		}
 		
 		private function makeShieldGfx():void
@@ -160,11 +176,53 @@ package
 			kickGfx.visible = false;
 		}
 		
+		function checkKeys():void
+		{
+			if (Input.check(forwardKey))
+			{
+				Forward();
+			} else {
+				Stop();
+			}
+			if (Input.check(leftKey))
+			{
+				Left();
+			}
+			if (Input.check(rightKey))
+			{
+				Right();
+			}
+			if (Input.check(boostKey))
+			{
+				KickOn();
+			}
+			else
+			{
+				KickOff();
+			}
+			if (Input.check(shieldKey))
+			{
+				ShieldOn();
+			}
+			else
+			{
+				ShieldOff();
+			}
+			if (Input.check(bombKey))
+			{
+				if (!xdown) {
+					DropBomb();
+					xdown = true;
+				}
+			}
+			else {
+				xdown = false;
+			}
+		}
+		
 		override public function update():void
 		{
-			if (acceleration > maxAccel) acceleration = maxAccel;
-			velocity.addTo(forward.multipliedBy(acceleration));
-			position.addTo(velocity);
+			super.update();
 			
 			if (collide("wall", position.x, position.y) || 
 				(collide("car", position.x, position.y))) {
@@ -186,29 +244,62 @@ package
 				kickGfx.Rotate(angle+180);
 			}
 			
+			var bomb:Entity = collide("bomb", x + forward.x*8, y + forward.y*8);
+			if (bomb)
+			{
+				var mt:Bomb = (bomb as Bomb);
+				if (!mt.throwing) {
+					if (kick)
+					{
+						mt.velocity = velocity.multipliedBy(bombButtFactor);
+					}
+					else
+					{
+						mt.setx(mt.x + forward.x * 8);
+						mt.sety(mt.y + forward.y * 8);
+					}
+				}
+			}
+			
+			var flag:Flag = collide("flag", x, y) as Flag;
+			if (flag && !flag.owner) {
+				flag.setOwner(this);
+				hasFlag = true;
+				myFlag = flag;
+			}
+			
 			acceleration = 0;
 			velocity.multiply(0.7);
-		}
-		
-		private function rotate(amount:Number)
-		{
-			if (acceleration != 0)
-			{
-				angle += amount;
-				image.angle = angle;
-				forward = Vector2D.rotToHeading((180-angle+270)*(Math.PI/180));
-			}
+			image.angle = angle;
+			
+			checkKeys();
 		}
 		
 		public function blast(x:Number, y:Number):void
 		{
 			if (!shield) {
+				if (hasFlag) {
+					myFlag.setOwner(null);
+					hasFlag = false;
+				}
 				var vec:Vector2D = new Vector2D(this.x - x, this.y - y);
 				var len:Number = vec.length;
 				vec.normalize();
 				vec.multiply(blastAccel);
 				velocity.addTo(vec);
 			}
+		}
+		
+		public function doesHaveFlag():Boolean
+		{
+			return hasFlag;
+		}
+		
+		public function removeFlag():void
+		{
+			myFlag.setOwner(null);
+			hasFlag = false;
+			myFlag = null;
 		}
 	}
 }

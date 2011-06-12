@@ -6,13 +6,18 @@
 	</settings>
 	<tilesets>
 		<tileset name="walls" image="assets/wall.png" tileWidth="16" tileHeight="16"/>
+		<tileset name="endzone1" image="assets/endzone1.png" tileWidth="32" tileHeight="32"/>
+		<tileset name="endzone2" image="assets/endzone2.png" tileWidth="32" tileHeight="32"/>
 	</tilesets>
 	<objects>
 		<object name="player1" image="assets/player1.png" width="16" height="16" limit="1"/>
 		<object name="player2" image="assets/player2.png" width="16" height="16" limit="1"/>
+		<object name="flag" image="assets/flag.png" width="32" height="32" limit="1"/>
 	</objects>
 	<layers>
 		<grid name="walls" gridSize="16"/>
+		<grid name="endzone1" gridSize="32"/>
+		<grid name="endzone2" gridSize="32"/>
 		<objects name="actors" gridSize="16"/>
 	</layers>
 </project>
