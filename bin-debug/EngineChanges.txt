@@ -1,0 +1,45 @@
+8/13/2009
+
+GameFactory:
+If no parent is specified for getEntity function, it will default to the instance of the gameworld ( if it exists )
+
+No longer need to specify entity t ype on getEntity…IE: var myBoid:Boid = m_factory.getEntity( "boid" ) as Boid. You can now take off the "as Boid"
+
+GameWorld
+Fixed error with the Gameworld's bounds setup.
+
+Moving Entity
+Added BOUNDS_STOP behavior
+Fixed the bounds behaviors for entities inside of other entities in different locations than 0,0
+
+Entity
+Fixed the bounds size calculation
+Entity now implements IEntity which will improve use with other classes etc such as the game factory.
+
+
+Root
+Made the change to the stageWidth/Height thing that makes it lookup what the dimensions are.
+
+Follow Path
+Fixed so that if it is set to "not" patrol, it will not create an error.
+
+
+
+2/8/2009
+
+ - GameFactory is no longer a singleton.
+ - Added creation of gameworld to GameFactory.
+ - Fixed dispose function on Entity.
+ - MovingEntity now restricts its movements to the max speed variable.
+ - MovingEntity has a MaxAcceleration var, but is mainly just for external use.
+ - Added a damping variable to MovingEntity.
+ - Fixed an incorrect math function on Matrix2D.rotateVector()
+ - CreateCallback function added to Root
+ - Updated all classes extending EntityParams with the ability to pass variables in the constructor IE:
+    new EntityParams( { radius:10, type:"Blob" } );
+    NOTE: be sure to call super( a_params:Object ) AFTER you set any of your defaults, or anything passed in will be overwritten ( by the defaults )
+ 
+ - Cleaned up Root by taking out the FPS calculation. Use a custom FPS class for this now, such as the Urbansquall one which I am using in the Main() class.
+ - Added astage width/height const to Root for ease of use. Obviously you will have to change it depending on your games size.
+ - Fixed the lineIntersecton function of the Geometry Class. Woot!
+ - Added a "getRandomPolygon" utility function to the Geometry class
